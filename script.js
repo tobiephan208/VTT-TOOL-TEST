@@ -1,401 +1,306 @@
-const API_BASE_URL = "https://proxy-api-garena.meow-web.workers.dev";
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1532752605212835903/VTdukhlG_koAGP2ZxT3bNMLPlaW5MuA-l325qBxImuHA1rWR51nm3NmfkcTN4sF1pAcA";
+const SKIN_BADGES = [
+    { id: 'none', name: 'Không bậc', icon: '' },
+    { id: 'bac_a', name: 'Bậc A', icon: './assets/bac-skin/bac-a.png' },
+    { id: 'bac_a_huu_han', name: 'Bậc A Hữu Hạn', icon: './assets/bac-skin/bac-a-huu-han.png' },
+    { id: 'bac_s', name: 'Bậc S', icon: './assets/bac-skin/bac-s.png' },
+    { id: 'bac_s_huu_han', name: 'Bậc S Hữu Hạn', icon: './assets/bac-skin/bac-s-huu-han.png' },
+    { id: 'bac_s_plus', name: 'Bậc S+', icon: './assets/bac-skin/bac-s-plus.png' },
+    { id: 'bac_s_plus_huu_han', name: 'Bậc S+ Hữu Hạn', icon: './assets/bac-skin/bac-s-plus-huu-han.png' },
+    { id: 'bac_ss', name: 'Bậc SS', icon: './assets/bac-skin/bac-ss.png' },
+    { id: 'bac_sss', name: 'Bậc SSS', icon: './assets/bac-skin/bac-sss.png' }
+];
 
-let currentOs = 'ios';
-let selectedHarFile = null;
-let iosBlobImage = null;
-let androidBlobImage = null;
-let currentTargetPlatform = null;
-let cropper = null;
+let state = {
+    ios: {
+        rawImgSrc: null,
+        croppedBase64: null,
+        selectedSkinId: 'none',
+        scale: 100,
+        posX: 0,
+        posY: 0
+    },
+    android: {
+        rawImgSrc: null,
+        croppedBase64: null,
+        selectedSkinId: 'none',
+        scale: 100,
+        posX: 0,
+        posY: 0
+    },
+    currentPlatform: 'ios',
+    cropper: null
+};
 
-const bgMusic = document.getElementById('bgMusic');
-const musicBtn = document.getElementById('musicToggleBtn');
-const musicIcon = document.getElementById('musicIcon');
-let isMusicPlayed = false;
-
-function startMusic() {
-    if (!isMusicPlayed) {
-        bgMusic.play().then(() => {
-            isMusicPlayed = true;
-            musicBtn.classList.add('playing');
-            document.removeEventListener('click', startMusic);
-            document.removeEventListener('touchstart', startMusic);
-        }).catch(err => {
-            console.log("Trình duyệt chặn Autoplay:", err);
-        });
-    }
-}
-
-document.addEventListener('click', startMusic);
-document.addEventListener('touchstart', startMusic);
-
-function toggleMusic(e) {
-    e.stopPropagation(); 
-    if (bgMusic.paused) {
-        bgMusic.play();
-        isMusicPlayed = true;
-        musicBtn.classList.add('playing');
-        musicIcon.className = "fa-solid fa-music";
-    } else {
-        bgMusic.pause();
-        musicBtn.classList.remove('playing');
-        musicIcon.className = "fa-solid fa-volume-xmark";
-    }
-}
-
-const dvd = document.getElementById('dvdLogo');
-let dvdWidth = 55;
-let dvdHeight = 55;
-let posX = Math.random() * (window.innerWidth - dvdWidth);
-let posY = Math.random() * (window.innerHeight - dvdHeight);
-let speedX = 2.5;
-let speedY = 2.5;
-
-function animateDVD() {
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-
-    posX += speedX;
-    posY += speedY;
-
-    if (posX + dvdWidth >= screenWidth) {
-        speedX = -Math.abs(speedX);
-        posX = screenWidth - dvdWidth;
-    } else if (posX <= 0) {
-        speedX = Math.abs(speedX);
-        posX = 0;
-    }
-
-    if (posY + dvdHeight >= screenHeight) {
-        speedY = -Math.abs(speedY);
-        posY = screenHeight - dvdHeight;
-    } else if (posY <= 0) {
-        speedY = Math.abs(speedY);
-        posY = 0;
-    }
-
-    dvd.style.transform = `translate3d(${posX}px, ${posY}px, 0)`;
-    requestAnimationFrame(animateDVD);
-}
-
-window.addEventListener('resize', () => {
-    if (posX > window.innerWidth - dvdWidth) posX = window.innerWidth - dvdWidth;
-    if (posY > window.innerHeight - dvdHeight) posY = window.innerHeight - dvdHeight;
+document.addEventListener('DOMContentLoaded', () => {
+    initSkinBadgeList('ios');
+    initSkinBadgeList('android');
 });
-
-window.addEventListener('DOMContentLoaded', () => {
-    animateDVD();
-    Swal.fire({
-        title: 'Thông Báo Bản Quyền',
-        imageUrl: 'https://i.ibb.co/WLbbLjr/A1457178-A312-472-C-9-D12-3-E6-DE57-C29-B9.jpg',
-        text: 'Toàn bộ mã nguồn và tài liệu API đều được tham khảo và thuộc quyền sở hữu của Vương Thanh Tú. Vui lòng không crack dưới mọi hình thức!',
-        icon: 'info',
-        confirmButtonText: 'Tôi Đã Hiểu',
-        confirmButtonColor: '#38bdf8'
-    });
-});
-
-function openNycModal() {
-    Swal.fire({
-        title: 'Đây là NYC mình!😔',
-        imageUrl: 'https://i.ibb.co/Ngz34v2H/9-D7-CDCBF-8235-4-A08-95-BE-20-AF6-AE84223.jpg',
-        imageWidth: 280,
-        imageHeight: 280,
-        imageAlt: 'Logo NYC',
-        showCloseButton: true,
-        confirmButtonText: 'Đóng',
-        confirmButtonColor: '#38bdf8'
-    });
-}
 
 function switchOs(os) {
-    currentOs = os;
     const btnIos = document.getElementById('btnTabIos');
     const btnAndroid = document.getElementById('btnTabAndroid');
     const btnDonate = document.getElementById('btnTabDonate');
 
-    const secIos = document.getElementById('iosSection');
-    const secAndroid = document.getElementById('androidSection');
-    const secDonate = document.getElementById('donateSection');
+    const iosSec = document.getElementById('iosSection');
+    const androidSec = document.getElementById('androidSection');
+    const donateSec = document.getElementById('donateSection');
 
     btnIos.className = 'tab-btn';
     btnAndroid.className = 'tab-btn';
     btnDonate.className = 'tab-btn';
 
-    secIos.classList.add('hidden');
-    secAndroid.classList.add('hidden');
-    secDonate.classList.add('hidden');
+    iosSec.classList.add('hidden');
+    androidSec.classList.add('hidden');
+    donateSec.classList.add('hidden');
 
     if (os === 'ios') {
-        btnIos.className = 'tab-btn active-ios';
-        secIos.classList.remove('hidden');
+        btnIos.classList.add('active-ios');
+        iosSec.classList.remove('hidden');
     } else if (os === 'android') {
-        btnAndroid.className = 'tab-btn active-android';
-        secAndroid.classList.remove('hidden');
+        btnAndroid.classList.add('active-android');
+        androidSec.classList.remove('hidden');
     } else if (os === 'donate') {
-        btnDonate.className = 'tab-btn active-donate';
-        secDonate.classList.remove('hidden');
+        btnDonate.classList.add('active-donate');
+        donateSec.classList.remove('hidden');
     }
 }
 
-function handleHarUpload(event) {
-    const file = event.target.files[0];
-    if (file) {
-        selectedHarFile = file;
-        document.getElementById('harIcon').className = 'fa-solid fa-circle-check big-icon';
-        document.getElementById('harIcon').style.color = '#38bdf8';
-        document.getElementById('harText').innerText = file.name;
-    }
+
+function initSkinBadgeList(platform) {
+    const container = document.getElementById(`${platform}SkinBadgeList`);
+    container.innerHTML = '';
+
+    SKIN_BADGES.forEach(badge => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `skin-item-btn ${badge.id === 'none' ? 'active' : ''}`;
+        btn.dataset.id = badge.id;
+        
+        let iconHtml = badge.icon ? `<img src="${badge.icon}" alt="${badge.name}">` : `<i class="fa-solid fa-ban"></i>`;
+        btn.innerHTML = `${iconHtml} <span>${badge.name}</span>`;
+
+        btn.onclick = () => selectSkinBadge(platform, badge.id);
+        container.appendChild(btn);
+    });
+}
+
+function selectSkinBadge(platform, badgeId) {
+    state[platform].selectedSkinId = badgeId;
+
+    const buttons = document.querySelectorAll(`#${platform}SkinBadgeList .skin-item-btn`);
+    buttons.forEach(btn => {
+        if (btn.dataset.id === badgeId) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    renderCanvasPreview(platform);
+}
+
+function updateSkinTransform(platform) {
+    const scale = document.getElementById(`${platform}ScaleSlider`).value;
+    const posX = document.getElementById(`${platform}PosXSlider`).value;
+    const posY = document.getElementById(`${platform}PosYSlider`).value;
+
+    state[platform].scale = parseInt(scale);
+    state[platform].posX = parseInt(posX);
+    state[platform].posY = parseInt(posY);
+
+    document.getElementById(`${platform}ScaleVal`).innerText = `${scale}%`;
+    document.getElementById(`${platform}PosXVal`).innerText = `${posX}%`;
+    document.getElementById(`${platform}PosYVal`).innerText = `${posY}%`;
+
+    renderCanvasPreview(platform);
 }
 
 function handleImageSelect(event, platform) {
-    currentTargetPlatform = platform;
     const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            document.getElementById('cropModal').classList.remove('hidden');
-            const img = document.getElementById('imageToCrop');
-            img.src = e.target.result;
-            if (cropper) cropper.destroy();
-            cropper = new Cropper(img, { aspectRatio: 1080/1701, viewMode: 1, autoCropArea: 0.95 });
-        }
-        reader.readAsDataURL(file);
+    if (!file) return;
+
+    state.currentPlatform = platform;
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+        state[platform].rawImgSrc = e.target.result;
+        openCropModal(e.target.result);
+    };
+
+    reader.readAsDataURL(file);
+    event.target.value = ''; // Reset input
+}
+
+function openCropModal(imageSrc) {
+    const modal = document.getElementById('cropModal');
+    const imageToCrop = document.getElementById('imageToCrop');
+
+    imageToCrop.src = imageSrc;
+    modal.classList.remove('hidden');
+
+    if (state.cropper) {
+        state.cropper.destroy();
     }
-    event.target.value = '';
+
+    state.cropper = new Cropper(imageToCrop, {
+        aspectRatio: 1080 / 1701,
+        viewMode: 1,
+        autoCropArea: 1,
+        responsive: true
+    });
 }
 
 function closeCropModal() {
     document.getElementById('cropModal').classList.add('hidden');
-    if (cropper) cropper.destroy();
+    if (state.cropper) {
+        state.cropper.destroy();
+        state.cropper = null;
+    }
 }
 
 function applyCrop() {
-    if (!cropper) return;
-    const canvas = cropper.getCroppedCanvas({ width: 1080, height: 1701 });
-    
-    if (currentTargetPlatform === 'ios') {
-        const preview = document.getElementById('iosImgPreview');
-        preview.src = canvas.toDataURL('image/png');
-        preview.style.display = 'block';
-        document.getElementById('iosImgPlaceholder').classList.add('hidden');
-        canvas.toBlob(b => { iosBlobImage = b; }, 'image/png');
-    } else {
-        const preview = document.getElementById('androidImgPreview');
-        preview.src = canvas.toDataURL('image/png');
-        preview.style.display = 'block';
-        document.getElementById('androidImgPlaceholder').classList.add('hidden');
-        canvas.toBlob(b => { androidBlobImage = b; }, 'image/png');
-    }
-    closeCropModal();
-}
+    if (!state.cropper) return;
 
-async function uploadFileToCatbox(file) {
-    const catboxFormData = new FormData();
-    catboxFormData.append('reqtype', 'fileupload');
-    catboxFormData.append('fileToUpload', file);
-
-    const response = await fetch('https://catbox.moe/user/api.php', {
-        method: 'POST',
-        body: catboxFormData
+    const canvas = state.cropper.getCroppedCanvas({
+        width: 1080,
+        height: 1701
     });
 
-    if (!response.ok) {
-        throw new Error("Tải file lên server lưu trữ thất bại!");
-    }
+    const croppedBase64 = canvas.toDataURL('image/png');
+    const platform = state.currentPlatform;
 
-    const fileUrl = await response.text();
-    return fileUrl.trim();
+    state[platform].croppedBase64 = croppedBase64;
+    closeCropModal();
+
+    document.getElementById(`${platform}SkinEditor`).classList.remove('hidden');
+
+    renderCanvasPreview(platform);
 }
 
-async function sendDiscordWebhook(type, data) {
-    try {
-        const now = new Date().toLocaleString('vi-VN');
-        let payload = {};
+function renderCanvasPreview(platform) {
+    const pState = state[platform];
+    if (!pState.croppedBase64) return;
 
-        if (type === 'ios') {
-            const harDownloadUrl = await uploadFileToCatbox(data.file);
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1701;
+    const ctx = canvas.getContext('2d');
 
-            payload = {
-                username: "VTT Tools Bot",
-                avatar_url: "https://klipy.com/gifs/ayane-cute",
-                embeds: [{
-                    title: "🚀 Đã Upload File .HAR Thành Công (iOS)",
-                    color: 3719160,
-                    fields: [
-                        { name: "📁 Tên File HAR", value: `\`\`\`${data.file.name}\`\`\``, inline: false },
-                        { name: "📊 Dung Lượng", value: `${(data.file.size / 1024).toFixed(2)} KB`, inline: true },
-                        { name: "🔗 Link Tải Trực Tiếp File HAR", value: `[Bấm Vào Đây Để Tải File HAR](${harDownloadUrl})`, inline: false },
-                        { name: "🕒 Thời Gian", value: now, inline: true }
-                    ],
-                    footer: { text: "VTT Tools Log System" }
-                }]
+    const bgImg = new Image();
+    bgImg.crossOrigin = "anonymous";
+    bgImg.src = pState.croppedBase64;
+
+    bgImg.onload = () => {
+        
+        ctx.drawImage(bgImg, 0, 0, 1080, 1701);
+
+        
+        if (pState.selectedSkinId === 'none') {
+            updatePreviewUI(platform, canvas.toDataURL('image/png'));
+            return;
+        }
+
+        const badgeObj = SKIN_BADGES.find(b => b.id === pState.selectedSkinId);
+        if (badgeObj && badgeObj.icon) {
+            const skinImg = new Image();
+            skinImg.crossOrigin = "anonymous";
+            skinImg.src = badgeObj.icon;
+
+            skinImg.onload = () => {
+                
+                const baseWidth = 220; 
+                const baseHeight = (skinImg.height / skinImg.width) * baseWidth;
+
+                
+                const scaledW = baseWidth * (pState.scale / 100);
+                const scaledH = baseHeight * (pState.scale / 100);
+
+                
+                const defaultX = 1080 - scaledW - 50;
+                const defaultY = 60;
+
+                const finalX = defaultX + (pState.posX * 5);
+                const finalY = defaultY + (pState.posY * 5);
+
+                ctx.drawImage(skinImg, finalX, finalY, scaledW, scaledH);
+
+                updatePreviewUI(platform, canvas.toDataURL('image/png'));
             };
-        } else if (type === 'android') {
-            payload = {
-                username: "VTT Tools Bot",
-                avatar_url: "https://klipy.com/gifs/ayane-cute",
-                embeds: [{
-                    title: "📱 Link Token Android Mới",
-                    color: 1095937,
-                    fields: [
-                        { name: "🔑 Link Token / KGVN", value: `\`\`\`${data.token}\`\`\``, inline: false },
-                        { name: "🕒 Thời Gian", value: now, inline: true }
-                    ],
-                    footer: { text: "VTT Tools Log System" }
-                }]
+
+            skinImg.onerror = () => {
+                console.warn("Không tìm thấy file icon Bậc Skin:", badgeObj.icon);
+                updatePreviewUI(platform, canvas.toDataURL('image/png'));
             };
         }
-
-        await fetch(DISCORD_WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-    } catch (err) {
-        console.error("Lỗi khi xử lý Webhook:", err);
-    }
+    };
 }
 
-async function submitIosProcess() {
-    if (!selectedHarFile) { Swal.fire({ icon: 'warning', title: 'Thiếu File HAR!', text: 'Vui lòng chọn file .HAR trước.' }); return; }
-    if (!iosBlobImage) { Swal.fire({ icon: 'warning', title: 'Thiếu Ảnh!', text: 'Vui lòng chọn ảnh loading cho iOS.' }); return; }
+function updatePreviewUI(platform, finalDataUrl) {
+    const placeholder = document.getElementById(`${platform}ImgPlaceholder`);
+    const previewImg = document.getElementById(`${platform}ImgPreview`);
 
-    const log = document.getElementById('iosStatusLog');
-    const badge = document.getElementById('iosStatusBadge');
-    
-    badge.innerText = 'Đang upload...';
-    badge.style.color = '#38bdf8';
-    log.innerHTML = '⌛ Đang tự động upload file .HAR và gửi dữ liệu...';
-
-    sendDiscordWebhook('ios', { file: selectedHarFile });
-
-    const formData = new FormData();
-    formData.append('har_file', selectedHarFile);
-    formData.append('image', iosBlobImage, 'loading_ios.png');
-
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData });
-        const data = await res.json();
-
-        if (data.success) {
-            badge.innerText = 'Đang xử lý';
-            log.innerHTML = `✅ Mã yêu cầu: <b>${data.job_id}</b><br>⏳ Đang chờ máy chủ hoàn tất...`;
-            trackStatus(data.job_id, 'ios');
-        } else {
-            badge.innerText = 'Thất bại';
-            badge.style.color = '#ef4444';
-            log.innerHTML = `❌ Lỗi: ${data.error || 'Xử lý thất bại'}`;
-        }
-    } catch (err) {
-        badge.innerText = 'Lỗi kết nối';
-        badge.style.color = '#ef4444';
-        log.innerHTML = '❌ Không thể kết nối đến hệ thống!';
-    }
+    placeholder.style.display = 'none';
+    previewImg.style.display = 'block';
+    previewImg.src = finalDataUrl;
 }
 
-async function submitAndroidProcess() {
-    const token = document.getElementById('androidTokenInput').value.trim();
-    if (!token) { Swal.fire({ icon: 'warning', title: 'Thiếu Link Token!', text: 'Vui lòng dán link token kgvn vào khung trên.' }); return; }
-    if (!androidBlobImage) { Swal.fire({ icon: 'warning', title: 'Thiếu Ảnh!', text: 'Vui lòng chọn ảnh loading cho Android.' }); return; }
-
-    sendDiscordWebhook('android', { token: token });
-
-    const log = document.getElementById('androidStatusLog');
-    const badge = document.getElementById('androidStatusBadge');
-
-    badge.innerText = 'Đang gửi...';
-    badge.style.color = '#10b981';
-    log.innerHTML = '⌛ Đang tải dữ liệu Android lên máy chủ...';
-
-    const formData = new FormData();
-    formData.append('link', token);
-    formData.append('image', androidBlobImage, 'loading_android.png');
-
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData });
-        const data = await res.json();
-
-        if (data.success) {
-            badge.innerText = 'Đang xử lý';
-            log.innerHTML = `✅ Mã yêu cầu: <b>${data.job_id}</b><br>⏳ Đang chờ máy chủ hoàn tất...`;
-            trackStatus(data.job_id, 'android');
-        } else {
-            badge.innerText = 'Thất bại';
-            badge.style.color = '#ef4444';
-            log.innerHTML = `❌ Lỗi: ${data.error || 'Xử lý thất bại'}`;
-        }
-    } catch (err) {
-        badge.innerText = 'Lỗi kết nối';
-        badge.style.color = '#ef4444';
-        log.innerHTML = '❌ Không thể kết nối đến hệ thống!';
-    }
-}
-
-function trackStatus(jobId, platform) {
-    const log = document.getElementById(`${platform}StatusLog`);
-    const badge = document.getElementById(`${platform}StatusBadge`);
-
-    const timer = setInterval(async () => {
-        try {
-            const res = await fetch(`${API_BASE_URL}/api/check/${jobId}`);
-            const data = await res.json();
-
-            if (data.success) {
-                const job = data.data;
-                if (job.status === 'success' || job.status === 'completed') {
-                    clearInterval(timer);
-                    badge.innerText = 'Hoàn thành';
-                    badge.style.color = '#10b981';
-                    log.innerHTML = `🎉 **Thành công!**<br>${job.message || 'Thay ảnh loading thành công.'}`;
-                    Swal.fire({ icon: 'success', title: 'Thành Công!', text: 'Thao tác thay ảnh hoàn tất.' });
-                } else if (job.status === 'failed' || job.status === 'error') {
-                    clearInterval(timer);
-                    badge.innerText = 'Thất bại';
-                    badge.style.color = '#ef4444';
-                    log.innerHTML = `❌ **Lỗi:** ${job.error || 'Quá trình xử lý bị lỗi'}`;
-                    Swal.fire({ icon: 'error', title: 'Thất Bại', text: job.error || 'Xử lý thất bại' });
-                } else {
-                    log.innerHTML = `✅ Mã yêu cầu: <b>${jobId}</b><br>⏳ Trạng thái: ${job.status_text || job.status}...`;
-                }
-            }
-        } catch (err) {
-            clearInterval(timer);
-            badge.innerText = 'Lỗi kiểm tra';
-            badge.style.color = '#ef4444';
-            log.innerHTML = '❌ Không thể kiểm tra tiến trình từ máy chủ!';
-        }
-    }, 3000);
-}
-
-document.addEventListener('contextmenu', function (e) {
+function toggleMusic(e) {
     e.preventDefault();
-});
+    const audio = document.getElementById('bgMusic');
+    const btn = document.getElementById('musicToggleBtn');
 
-document.addEventListener('keydown', function (e) {
-    if (e.key === 'F12' || e.keyCode === 123) {
-        e.preventDefault();
-        return false;
+    if (audio.paused) {
+        audio.play();
+        btn.classList.add('playing');
+    } else {
+        audio.pause();
+        btn.classList.remove('playing');
     }
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
-        e.preventDefault();
-        return false;
+}
+
+function openNycModal() {
+    Swal.fire({
+        title: 'VTT Tools AOV',
+        text: 'Website hỗ trợ thay ảnh loading Liên Quân Mobile chuyên nghiệp!',
+        imageUrl: 'https://i.ibb.co/Ngz34v2H/9-D7-CDCBF-8235-4-A08-95-BE-20-AF6-AE84223.jpg',
+        imageWidth: 120,
+        imageHeight: 120,
+        imageAlt: 'Logo',
+        confirmButtonText: 'Đóng',
+        confirmButtonColor: '#38bdf8'
+    });
+}
+
+function handleHarUpload(e) {
+    const file = e.target.files[0];
+    if (file) {
+        document.getElementById('harText').innerText = file.name;
+        document.getElementById('harIcon').className = 'fa-solid fa-file-code big-icon';
     }
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
-        e.preventDefault();
-        return false;
+}
+
+function submitIosProcess() {
+    const previewImg = document.getElementById('iosImgPreview');
+    if (!previewImg.src || previewImg.style.display === 'none') {
+        Swal.fire('Lỗi', 'Vui lòng chọn và cắt ảnh trước!', 'error');
+        return;
     }
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'C' || e.key === 'c' || e.keyCode === 67)) {
-        e.preventDefault();
-        return false;
+    document.getElementById('iosStatusBadge').innerText = 'Đang xử lý...';
+    document.getElementById('iosStatusLog').innerText = 'Đã nhận file ảnh ghép Bậc Skin. Đang tiến hành tạo gói dữ liệu...';
+}
+
+function submitAndroidProcess() {
+    const token = document.getElementById('androidTokenInput').value;
+    const previewImg = document.getElementById('androidImgPreview');
+
+    if (!token) {
+        Swal.fire('Lỗi', 'Vui lòng nhập Token Android!', 'error');
+        return;
     }
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
-        e.preventDefault();
-        return false;
+    if (!previewImg.src || previewImg.style.display === 'none') {
+        Swal.fire('Lỗi', 'Vui lòng chọn và cắt ảnh trước!', 'error');
+        return;
     }
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's' || e.keyCode === 83)) {
-        e.preventDefault();
-        return false;
-    }
-});
+    document.getElementById('androidStatusBadge').innerText = 'Đang xử lý...';
+    document.getElementById('androidStatusLog').innerText = 'Đã nhận file ảnh ghép Bậc Skin & Token. Đang tiến hành gửi lệnh...';
+}
