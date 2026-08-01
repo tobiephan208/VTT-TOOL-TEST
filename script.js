@@ -1,13 +1,13 @@
 const SKIN_BADGES = [
     { id: 'none', name: 'Không bậc', icon: '' },
-    { id: 'bac_a', name: 'Bậc A', icon: './assets/bac-skin/bac-a.png' },
-    { id: 'bac_a_huu_han', name: 'Bậc A Hữu Hạn', icon: './assets/bac-skin/bac-a-huu-han.png' },
-    { id: 'bac_s', name: 'Bậc S', icon: './assets/bac-skin/bac-s.png' },
-    { id: 'bac_s_huu_han', name: 'Bậc S Hữu Hạn', icon: './assets/bac-skin/bac-s-huu-han.png' },
-    { id: 'bac_s_plus', name: 'Bậc S+', icon: './assets/bac-skin/bac-s-plus.png' },
-    { id: 'bac_s_plus_huu_han', name: 'Bậc S+ Hữu Hạn', icon: './assets/bac-skin/bac-s-plus-huu-han.png' },
-    { id: 'bac_ss', name: 'Bậc SS', icon: './assets/bac-skin/bac-ss.png' },
-    { id: 'bac_sss', name: 'Bậc SSS', icon: './assets/bac-skin/bac-sss.png' }
+    { id: 'bac_a', name: 'Bậc A', icon: './assets/bac-skin/A.png' },
+    { id: 'bac_a_huu_han', name: 'Bậc A Hữu Hạn', icon: './assets/bac-skin/A-HUU-HAN.png' },
+    { id: 'bac_s', name: 'Bậc S', icon: './assets/bac-skin/S.png' },
+    { id: 'bac_s_huu_han', name: 'Bậc S Hữu Hạn', icon: './assets/bac-skin/S-HUU-HAN.png' },
+    { id: 'bac_s_plus', name: 'Bậc S+', icon: './assets/bac-skin/S+.png' },
+    { id: 'bac_s_plus_huu_han', name: 'Bậc S+ Hữu Hạn', icon: './assets/bac-skin/S+HUU-HAN.png' },
+    { id: 'bac_ss', name: 'Bậc SS', icon: './assets/bac-skin/SS.png' },
+    { id: 'bac_sss', name: 'Bậc SSS', icon: './assets/bac-skin/SSS-HUU-HAN.png' }
 ];
 
 let state = {
