@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VTT Tools - Tool Thay Ảnh Load Trận Aov</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <audio id="bgMusic" src="SAO ANH VO TINH RM.mp3" loop preload="auto"></audio>
+
+    <button class="music-btn-floating" id="musicToggleBtn" onclick="toggleMusic(event)" title="Bật/Tắt Nhạc">
+        <i class="fa-solid fa-music" id="musicIcon"></i>
+    </button>
+
+    <img id="dvdLogo" src="https://i.ibb.co/Ngz34v2H/9-D7-CDCBF-8235-4-A08-95-BE-20-AF6-AE84223.jpg" alt="DVD Logo" onclick="openNycModal()" title="Bấm để xem thêm">
+
+    <header class="site-header">
+        <div class="header-title-container">
+            <a href="https://aov-tool-thanhtu.netlify.app" target="_blank">
+                <img src="https://i.ibb.co/v63CD0Vx/logo.png" alt="Logo" style="width:220px; max-width:100%; display:block; margin:auto; user-select:none; pointer-events:auto;">
+            </a>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <div class="os-selector-card">
+            <div class="section-label">Chọn Mục Thao Tác</div>
+            <div class="os-tabs">
+                <button class="tab-btn active-ios" id="btnTabIos" onclick="switchOs('ios')">
+                    <i class="fa-brands fa-apple" style="font-size: 1.1rem;"></i> iOS
+                </button>
+                <button class="tab-btn" id="btnTabAndroid" onclick="switchOs('android')">
+                    <i class="fa-brands fa-android" style="font-size: 1.1rem;"></i> Android
+                </button>
+                <button class="tab-btn" id="btnTabDonate" onclick="switchOs('donate')">
+                    <i class="fa-solid fa-heart" style="font-size: 1.1rem; color: #FF3F1A;"></i> Donate
+                </button>
+            </div>
+        </div>
+
+        <div class="content-card" id="iosSection">
+            <div class="section-label">Tải Lên Dữ Liệu iOS</div>
+            <div class="upload-big-box" onclick="document.getElementById('harFileInput').click()">
+                <i class="fa-solid fa-cloud-arrow-up big-icon" id="harIcon"></i>
+                <div class="box-title" id="harText">Tải Lên File .HAR</div>
+                <div class="box-sub">Bấm để chọn file .HAR thu thập từ Proxypin</div>
+                <input type="file" id="harFileInput" accept=".har" onchange="handleHarUpload(event)" class="hidden">
+            </div>
+
+            <div class="section-label" style="margin-top: 5px;">Chọn Ảnh Loading Game</div>
+            <div class="upload-small-box" onclick="document.getElementById('iosImgInput').click()">
+                <div class="small-box-content" id="iosImgPlaceholder">
+                    <i class="fa-regular fa-image" style="font-size: 2rem; color: var(--text-sub); margin-bottom: 8px;"></i>
+                    <div style="font-size: 0.95rem; font-weight: 700;">Click để chọn ảnh</div>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 4px;">Tỉ lệ chuẩn 1080 x 1701</div>
+                </div>
+                <img id="iosImgPreview" class="preview-img" alt="iOS Preview">
+                <input type="file" id="iosImgInput" accept="image/*" onchange="handleImageSelect(event, 'ios')" class="hidden">
+            </div>
+
+            <button class="btn-action btn-ios" onclick="submitIosProcess()">
+                <i class="fa-solid fa-paper-plane"></i> GỬI XỬ LÝ
+            </button>
+
+            <div class="status-tracker-box">
+                <div class="tracker-title">
+                    <span><i class="fa-solid fa-spinner fa-spin"></i> Tiến Trình iOS</span>
+                    <span id="iosStatusBadge" style="color: var(--text-sub);">Sẵn sàng</span>
+                </div>
+                <div class="tracker-content" id="iosStatusLog">Chưa có tiến trình nào đang chạy...</div>
+            </div>
+        </div>
+
+        <div class="content-card hidden" id="androidSection">
+            <div class="section-label">Nhập Link Token Android</div>
+            <div>
+                <textarea id="androidTokenInput" class="input-token-area" placeholder="Dán link Token Thu Thập Được Của Bạn Vào Đây (Xoá DO:)"></textarea>
+            </div>
+
+            <div class="section-label" style="margin-top: 5px;">Chọn Ảnh Loading Game</div>
+            <div class="upload-small-box" onclick="document.getElementById('androidImgInput').click()">
+                <div class="small-box-content" id="androidImgPlaceholder">
+                    <i class="fa-regular fa-image" style="font-size: 2rem; color: var(--text-sub); margin-bottom: 8px;"></i>
+                    <div style="font-size: 0.95rem; font-weight: 700;">Click để chọn ảnh</div>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 4px;">Tỉ lệ chuẩn 1080 x 1701</div>
+                </div>
+                <img id="androidImgPreview" class="preview-img" alt="Android Preview">
+                <input type="file" id="androidImgInput" accept="image/*" onchange="handleImageSelect(event, 'android')" class="hidden">
+            </div>
+
+            <button class="btn-action btn-android" onclick="submitAndroidProcess()">
+                <i class="fa-solid fa-paper-plane"></i> GỬI XỬ LÝ
+            </button>
+
+            <div class="status-tracker-box">
+                <div class="tracker-title">
+                    <span><i class="fa-solid fa-spinner fa-spin"></i> Tiến Trình Android</span>
+                    <span id="androidStatusBadge" style="color: var(--text-sub);">Sẵn sàng</span>
+                </div>
+                <div class="tracker-content" id="androidStatusLog">Chưa có tiến trình nào đang chạy...</div>
+            </div>
+        </div>
+
+        <div class="content-card hidden" id="donateSection">
+            <div class="section-label" style="color: var(--donate-color);">Ủng Hộ Mình Sống Qua Ngày:</div>
+            <div style="text-align: center;">
+                <a href="https://ibb.co/QvxxFqLs" target="_blank">
+                    <img src="https://i.ibb.co/mVw35CcH/AC32-EA8-C-0100-46-BF-9464-A000-C1-B76416.jpg" alt="Donate QR" style="max-width: 100%; border-radius: 12px; display: inline-block;">
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="social-icons-bar">
+            <a href="https://www.facebook.com/share/18v9vQAYT6/?mibextid=wwXIfr" target="_blank" class="social-icon-btn facebook" title="Facebook">
+                <i class="fa-brands fa-facebook-f"></i>
+            </a>
+            <a href="https://www.tiktok.com/@thanhtu.deeptry?_r=1&_t=ZS-98Uk38adGzp" target="_blank" class="social-icon-btn tiktok" title="TikTok">
+                <i class="fa-brands fa-tiktok"></i>
+            </a>
+            <a href="https://youtube.com/@vuongthanhtudeeptry?si=1XWV6BPHLSvZrpLV" target="_blank" class="social-icon-btn youtube" title="YouTube">
+                <i class="fa-brands fa-youtube"></i>
+            </a>
+        </div>
+        <div class="footer-copyright">
+            © 2026 Vuong Thanh Tu - vtt-tool.netlify.app
+        </div>
+    </footer>
+
+    <div id="cropModal" class="hidden">
+        <h3 style="margin-bottom: 15px; font-family: 'Space Grotesk', sans-serif; color: #fff;">
+            Cắt Ảnh Loading (1080 x 1701)
+        </h3>
+        <div class="crop-card">
+            <img id="imageToCrop" style="max-width: 100%;" />
+        </div>
+        <div class="crop-actions">
+            <button class="btn-crop-cancel" onclick="closeCropModal()">HỦY</button>
+            <button class="btn-crop-confirm" onclick="applyCrop()">XÁC NHẬN CẮT</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
