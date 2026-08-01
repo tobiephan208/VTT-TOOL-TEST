@@ -73,6 +73,30 @@
                 <input type="file" id="iosImgInput" accept="image/*" onchange="handleImageSelect(event, 'ios')" class="hidden">
             </div>
 
+            <div class="skin-editor-box hidden" id="iosSkinEditor">
+                <div class="section-label"><i class="fa-solid fa-shield-halved"></i> Ghép Bậc Skin</div>
+                <div class="skin-badge-scroll" id="iosSkinBadgeList">
+                    
+                </div>
+
+                <div class="slider-controls-group">
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Kích Cỡ</span> <span id="iosScaleVal">100%</span></div>
+                        <input type="range" id="iosScaleSlider" min="10" max="200" value="100" oninput="updateSkinTransform('ios')">
+                    </div>
+
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Chiều Ngang (X)</span> <span id="iosPosXVal">0%</span></div>
+                        <input type="range" id="iosPosXSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('ios')">
+                    </div>
+
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Chiều Dọc (Y)</span> <span id="iosPosYVal">0%</span></div>
+                        <input type="range" id="iosPosYSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('ios')">
+                    </div>
+                </div>
+            </div>
+
             <button class="btn-action btn-ios" onclick="submitIosProcess()">
                 <i class="fa-solid fa-paper-plane"></i> GỬI XỬ LÝ
             </button>
@@ -86,6 +110,7 @@
             </div>
         </div>
 
+        
         <div class="content-card hidden" id="androidSection">
             <div class="section-label">Nhập Link Token Android</div>
             <div>
@@ -101,6 +126,31 @@
                 </div>
                 <img id="androidImgPreview" class="preview-img" alt="Android Preview">
                 <input type="file" id="androidImgInput" accept="image/*" onchange="handleImageSelect(event, 'android')" class="hidden">
+            </div>
+
+            
+            <div class="skin-editor-box hidden" id="androidSkinEditor">
+                <div class="section-label"><i class="fa-solid fa-shield-halved"></i> Ghép Bậc Skin</div>
+                <div class="skin-badge-scroll" id="androidSkinBadgeList">
+                    
+                </div>
+
+                <div class="slider-controls-group">
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Kích Cỡ</span> <span id="androidScaleVal">100%</span></div>
+                        <input type="range" id="androidScaleSlider" min="10" max="200" value="100" oninput="updateSkinTransform('android')">
+                    </div>
+
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Chiều Ngang (X)</span> <span id="androidPosXVal">0%</span></div>
+                        <input type="range" id="androidPosXSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('android')">
+                    </div>
+
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Chiều Dọc (Y)</span> <span id="androidPosYVal">0%</span></div>
+                        <input type="range" id="androidPosYSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('android')">
+                    </div>
+                </div>
             </div>
 
             <button class="btn-action btn-android" onclick="submitAndroidProcess()">
