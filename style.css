@@ -118,18 +118,11 @@ body::before {
 
 @keyframes neonPulse {
     0% {
-        text-shadow: 
-            0 0 4px #00f2fe,
-            0 0 8px #00f2fe,
-            0 0 15px #4facfe;
+        text-shadow: 0 0 4px #00f2fe, 0 0 8px #00f2fe, 0 0 15px #4facfe;
         opacity: 0.9;
     }
     100% {
-        text-shadow: 
-            0 0 6px #00f2fe,
-            0 0 12px #00f2fe,
-            0 0 25px #4facfe,
-            0 0 45px #00f2fe;
+        text-shadow: 0 0 6px #00f2fe, 0 0 12px #00f2fe, 0 0 25px #4facfe, 0 0 45px #00f2fe;
         opacity: 1;
     }
 }
@@ -157,6 +150,9 @@ body::before {
     margin-left: 4px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .os-tabs {
@@ -298,6 +294,108 @@ body::before {
     object-fit: cover;
     display: none;
     z-index: 2;
+}
+
+/* UI TOOLBOX BẬC SKIN & CÁC THANH KÉO SLIDER */
+.skin-editor-box {
+    background: #090a0e;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.skin-badge-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #38bdf8 transparent;
+}
+
+.skin-badge-scroll::-webkit-scrollbar {
+    height: 5px;
+}
+.skin-badge-scroll::-webkit-scrollbar-thumb {
+    background: #38bdf8;
+    border-radius: 10px;
+}
+
+.skin-item-btn {
+    flex: 0 0 auto;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-sub);
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.skin-item-btn img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.skin-item-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.skin-item-btn.active {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: #38bdf8;
+    color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.slider-controls-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.slider-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    font-weight: 600;
+}
+
+.slider-item input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    outline: none;
+}
+
+.slider-item input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #38bdf8;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
 }
 
 .status-tracker-box {
