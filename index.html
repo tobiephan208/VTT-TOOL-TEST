@@ -2,167 +2,209 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tool Ghép Bậc Skin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VTT Tools - Tool Thay Ảnh Load Trận Aov</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.min.js"></script>
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="navbar">
-        <div class="logo">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span>Skin Badge Studio</span>
-        </div>
-        <div class="nav-actions">
-            <button id="musicToggleBtn" onclick="toggleMusic(event)" class="icon-btn">
-                <i class="fa-solid fa-music"></i>
-            </button>
-            <audio id="bgMusic" loop src="./assets/bg-music.mp3"></audio>
+
+    <audio id="bgMusic" src="SAO ANH VO TINH RM.mp3" loop preload="auto"></audio>
+
+    <button class="music-btn-floating" id="musicToggleBtn" onclick="toggleMusic(event)" title="Bật/Tắt Nhạc">
+        <i class="fa-solid fa-music" id="musicIcon"></i>
+    </button>
+
+    <header class="site-header">
+        <div class="header-title-container">
+            <a href="https://aov-tool-thanhtu.netlify.app" target="_blank">
+                <img src="https://i.ibb.co/v63CD0Vx/logo.png" alt="Logo" style="width:220px; max-width:100%; display:block; margin:auto; user-select:none; pointer-events:auto;">
+            </a>
+            <div class="header-subtitle-neon">
+                Website tổng hợp các tool game Liên Quân Mobile
+            </div>
         </div>
     </header>
 
-    <main class="container">
-        <div class="tabs-nav">
-            <button id="btnTabIos" class="tab-btn active-ios" onclick="switchOs('ios')">
-                <i class="fa-brands fa-apple"></i> iOS
-            </button>
-            <button id="btnTabAndroid" class="tab-btn" onclick="switchOs('android')">
-                <i class="fa-brands fa-android"></i> Android
-            </button>
-            <button id="btnTabDonate" class="tab-btn" onclick="switchOs('donate')">
-                <i class="fa-solid fa-heart"></i> Donate
-            </button>
+    <main class="main-container">
+
+        <div class="os-selector-card">
+            <div class="section-label">Chọn Mục Thao Tác</div>
+            <div class="os-tabs">
+                <button class="tab-btn active-ios" id="btnTabIos" onclick="switchOs('ios')">
+                    <i class="fa-brands fa-apple" style="font-size: 1.1rem;"></i> iOS
+                </button>
+                <button class="tab-btn" id="btnTabAndroid" onclick="switchOs('android')">
+                    <i class="fa-brands fa-android" style="font-size: 1.1rem;"></i> Android
+                </button>
+                <button class="tab-btn" id="btnTabDonate" onclick="switchOs('donate')">
+                    <i class="fa-solid fa-heart" style="font-size: 1.1rem; color: #FF3F1A;"></i> Donate
+                </button>
+            </div>
         </div>
 
-        <section id="iosSection" class="tab-content">
-            <div class="card">
-                <h2>Cấu hình iOS</h2>
-                <div class="form-group">
-                    <label> Tải ảnh mẫu iOS:</label>
-                    <input type="file" accept="image/*" onchange="handleImageSelect(event, 'ios')">
+        <div class="content-card" id="iosSection">
+            <div class="section-label">Tải Lên Dữ Liệu iOS</div>
+            <div class="upload-big-box" onclick="document.getElementById('harFileInput').click()">
+                <i class="fa-solid fa-cloud-arrow-up big-icon" id="harIcon"></i>
+                <div class="box-title" id="harText">Tải Lên File .HAR</div>
+                <div class="box-sub">Bấm để chọn file .HAR thu thập từ Proxypin</div>
+                <input type="file" id="harFileInput" accept=".har" onchange="handleHarUpload(event)" class="hidden">
+            </div>
+
+            <div class="section-label" style="margin-top: 5px;">Chọn Ảnh Loading Game</div>
+            <div class="upload-small-box" onclick="document.getElementById('iosImgInput').click()">
+                <div class="small-box-content" id="iosImgPlaceholder">
+                    <i class="fa-regular fa-image" style="font-size: 2rem; color: var(--text-sub); margin-bottom: 8px;"></i>
+                    <div style="font-size: 0.95rem; font-weight: 700;">Click để chọn ảnh</div>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 4px;">Tỉ lệ chuẩn 1080 x 1701</div>
+                </div>
+                <img id="iosImgPreview" class="preview-img" alt="iOS Preview">
+                <input type="file" id="iosImgInput" accept="image/*" onchange="handleImageSelect(event, 'ios')" class="hidden">
+            </div>
+
+            <div class="skin-editor-box hidden" id="iosSkinEditor">
+                <div class="section-label"><i class="fa-solid fa-shield-halved"></i> Ghép Bậc Skin</div>
+                <div class="skin-badge-scroll" id="iosSkinBadgeList">
+                    
                 </div>
 
-                <div id="iosSkinEditor" class="skin-editor-container hidden">
-                    <h3> Chọn Bậc Skin</h3>
-                    <div id="iosSkinBadgeList" class="skin-badge-grid"></div>
+                <div class="slider-controls-group">
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Kích Cỡ</span> <span id="iosScaleVal">100%</span></div>
+                        <input type="range" id="iosScaleSlider" min="10" max="200" value="100" oninput="updateSkinTransform('ios')">
+                    </div>
 
-                    <div class="transform-controls">
-                        <div class="control-group">
-                            <label>Kích cỡ: <span id="iosScaleVal">50%</span></label>
-                            <input type="range" id="iosScaleSlider" min="10" max="150" value="50" oninput="updateSkinTransform('ios')">
-                        </div>
-                        <div class="control-group">
-                            <label>Vị trí X: <span id="iosPosXVal">0%</span></label>
-                            <input type="range" id="iosPosXSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('ios')">
-                        </div>
-                        <div class="control-group">
-                            <label>Vị trí Y: <span id="iosPosYVal">0%</span></label>
-                            <input type="range" id="iosPosYSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('ios')">
-                        </div>
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Chiều Ngang (X)</span> <span id="iosPosXVal">0%</span></div>
+                        <input type="range" id="iosPosXSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('ios')">
+                    </div>
+
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Chiều Dọc (Y)</span> <span id="iosPosYVal">0%</span></div>
+                        <input type="range" id="iosPosYSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('ios')">
                     </div>
                 </div>
+            </div>
 
-                <div class="preview-box">
-                    <div id="iosImgPlaceholder" class="placeholder">Chưa chọn ảnh</div>
-                    <img id="iosImgPreview" style="display: none;" alt="iOS Preview">
+            <button class="btn-action btn-ios" onclick="submitIosProcess()">
+                <i class="fa-solid fa-paper-plane"></i> GỬI XỬ LÝ
+            </button>
+
+            <div class="status-tracker-box">
+                <div class="tracker-title">
+                    <span><i class="fa-solid fa-spinner fa-spin"></i> Tiến Trình iOS</span>
+                    <span id="iosStatusBadge" style="color: var(--text-sub);">Sẵn sàng</span>
+                </div>
+                <div class="tracker-content" id="iosStatusLog">Chưa có tiến trình nào đang chạy...</div>
+            </div>
+        </div>
+
+        
+        <div class="content-card hidden" id="androidSection">
+            <div class="section-label">Nhập Link Token Android</div>
+            <div>
+                <textarea id="androidTokenInput" class="input-token-area" placeholder="Dán link Token Thu Thập Được Của Bạn Vào Đây (Xoá DO:)"></textarea>
+            </div>
+
+            <div class="section-label" style="margin-top: 5px;">Chọn Ảnh Loading Game</div>
+            <div class="upload-small-box" onclick="document.getElementById('androidImgInput').click()">
+                <div class="small-box-content" id="androidImgPlaceholder">
+                    <i class="fa-regular fa-image" style="font-size: 2rem; color: var(--text-sub); margin-bottom: 8px;"></i>
+                    <div style="font-size: 0.95rem; font-weight: 700;">Click để chọn ảnh</div>
+                    <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 4px;">Tỉ lệ chuẩn 1080 x 1701</div>
+                </div>
+                <img id="androidImgPreview" class="preview-img" alt="Android Preview">
+                <input type="file" id="androidImgInput" accept="image/*" onchange="handleImageSelect(event, 'android')" class="hidden">
+            </div>
+
+            
+            <div class="skin-editor-box hidden" id="androidSkinEditor">
+                <div class="section-label"><i class="fa-solid fa-shield-halved"></i> Ghép Bậc Skin</div>
+                <div class="skin-badge-scroll" id="androidSkinBadgeList">
+                    
                 </div>
 
-                <div class="form-group margin-top">
-                    <label>Tải file HAR:</label>
-                    <div class="file-dropzone" onclick="document.getElementById('iosHarInput').click()">
-                        <i id="harIcon" class="fa-solid fa-cloud-arrow-up big-icon"></i>
-                        <span id="harText">Nhấp để chọn file .HAR</span>
-                        <input type="file" id="iosHarInput" accept=".har" style="display: none;" onchange="handleHarUpload(event)">
+                <div class="slider-controls-group">
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Kích Cỡ</span> <span id="androidScaleVal">100%</span></div>
+                        <input type="range" id="androidScaleSlider" min="10" max="200" value="100" oninput="updateSkinTransform('android')">
+                    </div>
+
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Chiều Ngang (X)</span> <span id="androidPosXVal">0%</span></div>
+                        <input type="range" id="androidPosXSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('android')">
+                    </div>
+
+                    <div class="slider-item">
+                        <div class="slider-label"><span>Chỉnh Chiều Dọc (Y)</span> <span id="androidPosYVal">0%</span></div>
+                        <input type="range" id="androidPosYSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('android')">
                     </div>
                 </div>
-
-                <button class="btn-submit btn-ios" onclick="submitIosProcess()">
-                    <i class="fa-solid fa-bolt"></i> Bắt đầu xử lý iOS
-                </button>
-
-                <div class="status-box">
-                    <div>Trạng thái: <span id="iosStatusBadge" class="badge">Sẵn sàng</span></div>
-                    <div id="iosStatusLog" class="log-text">Chờ lệnh...</div>
-                </div>
             </div>
-        </section>
 
-        <section id="androidSection" class="tab-content hidden">
-            <div class="card">
-                <h2>Cấu hình Android</h2>
-                <div class="form-group">
-                    <label>Nhập Token Android:</label>
-                    <input type="text" id="androidTokenInput" placeholder="Dán Access Token vào đây...">
+            <button class="btn-action btn-android" onclick="submitAndroidProcess()">
+                <i class="fa-solid fa-paper-plane"></i> GỬI XỬ LÝ
+            </button>
+
+            <div class="status-tracker-box">
+                <div class="tracker-title">
+                    <span><i class="fa-solid fa-spinner fa-spin"></i> Tiến Trình Android</span>
+                    <span id="androidStatusBadge" style="color: var(--text-sub);">Sẵn sàng</span>
                 </div>
-
-                <div class="form-group">
-                    <label>Tải ảnh mẫu Android:</label>
-                    <input type="file" accept="image/*" onchange="handleImageSelect(event, 'android')">
-                </div>
-
-                <div id="androidSkinEditor" class="skin-editor-container hidden">
-                    <h3>Chọn Bậc Skin</h3>
-                    <div id="androidSkinBadgeList" class="skin-badge-grid"></div>
-
-                    <div class="transform-controls">
-                        <div class="control-group">
-                            <label>Kích cỡ: <span id="androidScaleVal">50%</span></label>
-                            <input type="range" id="androidScaleSlider" min="10" max="150" value="50" oninput="updateSkinTransform('android')">
-                        </div>
-                        <div class="control-group">
-                            <label>Vị trí X: <span id="androidPosXVal">0%</span></label>
-                            <input type="range" id="androidPosXSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('android')">
-                        </div>
-                        <div class="control-group">
-                            <label>Vị trí Y: <span id="androidPosYVal">0%</span></label>
-                            <input type="range" id="androidPosYSlider" min="-100" max="100" value="0" oninput="updateSkinTransform('android')">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="preview-box">
-                    <div id="androidImgPlaceholder" class="placeholder">Chưa chọn ảnh</div>
-                    <img id="androidImgPreview" style="display: none;" alt="Android Preview">
-                </div>
-
-                <button class="btn-submit btn-android" onclick="submitAndroidProcess()">
-                    <i class="fa-solid fa-paper-plane"></i> Gửi lệnh Android
-                </button>
-
-                <div class="status-box">
-                    <div>Trạng thái: <span id="androidStatusBadge" class="badge">Sẵn sàng</span></div>
-                    <div id="androidStatusLog" class="log-text">Chờ lệnh...</div>
-                </div>
+                <div class="tracker-content" id="androidStatusLog">Chưa có tiến trình nào đang chạy...</div>
             </div>
-        </section>
+        </div>
 
-        <section id="donateSection" class="tab-content hidden">
-            <div class="card donate-card">
-                <h2>Ủng hộ tác giả</h2>
-                <p>Cảm ơn bạn đã sử dụng công cụ! Mọi sự ủng hộ đều giúp nâng cấp hệ thống tốt hơn.</p>
-                <div class="qr-container">
-                    <img src="./assets/donate-qr.png" alt="QR Donate">
-                </div>
+        <div class="content-card hidden" id="donateSection">
+            <div class="section-label" style="color: var(--donate-color);">Ủng Hộ Mình Sống Qua Ngày:</div>
+            <div style="text-align: center;">
+                <a href="https://ibb.co/QvxxFqLs" target="_blank">
+                    <img src="https://i.ibb.co/mVw35CcH/AC32-EA8-C-0100-46-BF-9464-A000-C1-B76416.jpg" alt="Donate QR" style="max-width: 100%; border-radius: 12px; display: inline-block;">
+                </a>
             </div>
-        </section>
+        </div>
     </main>
 
-    <div id="cropModal" class="modal hidden">
-        <div class="modal-content">
-            <h3>Cắt ảnh (Tỷ lệ 1080 x 1701)</h3>
-            <div class="crop-container">
-                <img id="imageToCrop" alt="Source Image">
-            </div>
-            <div class="modal-actions">
-                <button class="btn-secondary" onclick="closeCropModal()">Hủy</button>
-                <button class="btn-primary" onclick="applyCrop()">Áp dụng</button>
-            </div>
+    <footer class="site-footer">
+        <div class="social-icons-bar">
+            <a href="https://www.facebook.com/share/18v9vQAYT6/?mibextid=wwXIfr" target="_blank" class="social-icon-btn facebook" title="Facebook">
+                <i class="fa-brands fa-facebook-f"></i>
+            </a>
+            <a href="https://www.tiktok.com/@thanhtu.deeptry?_r=1&_t=ZS-98Uk38adGzp" target="_blank" class="social-icon-btn tiktok" title="TikTok">
+                <i class="fa-brands fa-tiktok"></i>
+            </a>
+            <a href="https://youtube.com/@vuongthanhtudeeptry?si=1XWV6BPHLSvZrpLV" target="_blank" class="social-icon-btn youtube" title="YouTube">
+                <i class="fa-brands fa-youtube"></i>
+            </a>
+        </div>
+        <div class="footer-copyright">
+            © 2026 Vuong Thanh Tu - vtt-tool.netlify.app
+        </div>
+    </footer>
+
+    <div id="cropModal" class="hidden">
+        <h3 style="margin-bottom: 15px; font-family: 'Space Grotesk', sans-serif; color: #fff;">
+            Cắt Ảnh Loading (1080 x 1701)
+        </h3>
+        <div class="crop-card">
+            <img id="imageToCrop" style="max-width: 100%;" />
+        </div>
+        <div class="crop-actions">
+            <button class="btn-crop-cancel" onclick="closeCropModal()">HỦY</button>
+            <button class="btn-crop-confirm" onclick="applyCrop()">XÁC NHẬN CẮT</button>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
