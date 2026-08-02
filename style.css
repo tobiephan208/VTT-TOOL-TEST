@@ -57,27 +57,7 @@ body::before {
     0% { transform: translate(0, 0) rotate(0deg); }
     50% { transform: translate(-3%, 3%) rotate(2deg); }
     100% { transform: translate(3%, -2%) rotate(-2deg); }
-}
 
-#dvdLogo {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 55px;
-    height: 55px;
-    border-radius: 16px;
-    object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-    cursor: pointer;
-    z-index: 99999;
-    opacity: 0.85;
-    transition: opacity 0.25s ease;
-    will-change: transform;
-}
-
-#dvdLogo:hover {
-    opacity: 1;
 }
 
 .site-header {
@@ -296,7 +276,6 @@ body::before {
     z-index: 2;
 }
 
-/* UI TOOLBOX BẬC SKIN & CÁC THANH KÉO SLIDER */
 .skin-editor-box {
     background: #090a0e;
     border: 1px solid rgba(255, 255, 255, 0.08);
