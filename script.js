@@ -1,3 +1,4 @@
+const API_BASE_URL = "https://proxy-api-garena.meow-web.workers.dev";
 const SKIN_BADGES = [
     { id: 'none', name: 'Không bậc', icon: '' },
     { id: 'bac_a', name: 'Bậc A', icon: './assets/bac-skin/A.png' },
