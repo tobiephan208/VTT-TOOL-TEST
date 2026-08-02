@@ -134,7 +134,7 @@ function handleImageSelect(event, platform) {
     };
 
     reader.readAsDataURL(file);
-    event.target.value = ''; // Reset input
+    event.target.value = '';
 }
 
 function openCropModal(imageSrc) {
@@ -262,19 +262,6 @@ function toggleMusic(e) {
         audio.pause();
         btn.classList.remove('playing');
     }
-}
-
-function openNycModal() {
-    Swal.fire({
-        title: 'VTT Tools AOV',
-        text: 'Website hỗ trợ thay ảnh loading Liên Quân Mobile chuyên nghiệp!',
-        imageUrl: 'https://i.ibb.co/Ngz34v2H/9-D7-CDCBF-8235-4-A08-95-BE-20-AF6-AE84223.jpg',
-        imageWidth: 120,
-        imageHeight: 120,
-        imageAlt: 'Logo',
-        confirmButtonText: 'Đóng',
-        confirmButtonColor: '#38bdf8'
-    });
 }
 
 function handleHarUpload(e) {
