@@ -21,7 +21,7 @@ let state = {
         rawImgSrc: null,
         croppedBase64: null,
         selectedSkinId: 'none',
-        scale: 100,
+        scale: 50,
         posX: 0,
         posY: 0
     },
@@ -29,7 +29,7 @@ let state = {
         rawImgSrc: null,
         croppedBase64: null,
         selectedSkinId: 'none',
-        scale: 100,
+        scale: 50,
         posX: 0,
         posY: 0
     },
@@ -71,9 +71,9 @@ function switchOs(os) {
     }
 }
 
-
 function initSkinBadgeList(platform) {
     const container = document.getElementById(`${platform}SkinBadgeList`);
+    if (!container) return;
     container.innerHTML = '';
 
     SKIN_BADGES.forEach(badge => {
@@ -93,6 +93,26 @@ function initSkinBadgeList(platform) {
 function selectSkinBadge(platform, badgeId) {
     state[platform].selectedSkinId = badgeId;
 
+    state[platform].scale = 50;
+    state[platform].posX = 0;
+    state[platform].posY = 0;
+
+    const scaleSlider = document.getElementById(`${platform}ScaleSlider`);
+    const posXSlider = document.getElementById(`${platform}PosXSlider`);
+    const posYSlider = document.getElementById(`${platform}PosYSlider`);
+
+    const scaleVal = document.getElementById(`${platform}ScaleVal`);
+    const posXVal = document.getElementById(`${platform}PosXVal`);
+    const posYVal = document.getElementById(`${platform}PosYVal`);
+
+    if (scaleSlider) scaleSlider.value = 50;
+    if (posXSlider) posXSlider.value = 0;
+    if (posYSlider) posYSlider.value = 0;
+
+    if (scaleVal) scaleVal.innerText = '50%';
+    if (posXVal) posXVal.innerText = '0%';
+    if (posYVal) posYVal.innerText = '0%';
+
     const buttons = document.querySelectorAll(`#${platform}SkinBadgeList .skin-item-btn`);
     buttons.forEach(btn => {
         if (btn.dataset.id === badgeId) {
@@ -110,9 +130,9 @@ function updateSkinTransform(platform) {
     const posX = document.getElementById(`${platform}PosXSlider`).value;
     const posY = document.getElementById(`${platform}PosYSlider`).value;
 
-    state[platform].scale = parseInt(scale);
-    state[platform].posX = parseInt(posX);
-    state[platform].posY = parseInt(posY);
+    state[platform].scale = parseInt(scale, 10);
+    state[platform].posX = parseInt(posX, 10);
+    state[platform].posY = parseInt(posY, 10);
 
     document.getElementById(`${platform}ScaleVal`).innerText = `${scale}%`;
     document.getElementById(`${platform}PosXVal`).innerText = `${posX}%`;
@@ -178,7 +198,8 @@ function applyCrop() {
     state[platform].croppedBase64 = croppedBase64;
     closeCropModal();
 
-    document.getElementById(`${platform}SkinEditor`).classList.remove('hidden');
+    const editorEl = document.getElementById(`${platform}SkinEditor`);
+    if (editorEl) editorEl.classList.remove('hidden');
 
     renderCanvasPreview(platform);
 }
@@ -197,10 +218,8 @@ function renderCanvasPreview(platform) {
     bgImg.src = pState.croppedBase64;
 
     bgImg.onload = () => {
-        
         ctx.drawImage(bgImg, 0, 0, 1080, 1701);
 
-        
         if (pState.selectedSkinId === 'none') {
             updatePreviewUI(platform, canvas.toDataURL('image/png'));
             return;
@@ -213,20 +232,20 @@ function renderCanvasPreview(platform) {
             skinImg.src = badgeObj.icon;
 
             skinImg.onload = () => {
-                
-                const baseWidth = 220; 
-                const baseHeight = (skinImg.height / skinImg.width) * baseWidth;
+                const aspect = skinImg.height / skinImg.width;
+                const maxW = canvas.width;
 
-                
-                const scaledW = baseWidth * (pState.scale / 100);
-                const scaledH = baseHeight * (pState.scale / 100);
+                const scaledW = maxW * (pState.scale / 100);
+                const scaledH = scaledW * aspect;
 
-                
-                const defaultX = 1080 - scaledW - 50;
-                const defaultY = 60;
+                const centerX = (canvas.width - scaledW) / 2;
+                const centerY = (canvas.height - scaledH) / 2;
 
-                const finalX = defaultX + (pState.posX * 5);
-                const finalY = defaultY + (pState.posY * 5);
+                const maxOffsetX = (canvas.width - scaledW) / 2;
+                const maxOffsetY = (canvas.height - scaledH) / 2;
+
+                const finalX = centerX + (maxOffsetX * (pState.posX / 100));
+                const finalY = centerY - (maxOffsetY * (pState.posY / 100));
 
                 ctx.drawImage(skinImg, finalX, finalY, scaledW, scaledH);
 
@@ -245,15 +264,19 @@ function updatePreviewUI(platform, finalDataUrl) {
     const placeholder = document.getElementById(`${platform}ImgPlaceholder`);
     const previewImg = document.getElementById(`${platform}ImgPreview`);
 
-    placeholder.style.display = 'none';
-    previewImg.style.display = 'block';
-    previewImg.src = finalDataUrl;
+    if (placeholder) placeholder.style.display = 'none';
+    if (previewImg) {
+        previewImg.style.display = 'block';
+        previewImg.src = finalDataUrl;
+    }
 }
 
 function toggleMusic(e) {
     e.preventDefault();
     const audio = document.getElementById('bgMusic');
     const btn = document.getElementById('musicToggleBtn');
+
+    if (!audio) return;
 
     if (audio.paused) {
         audio.play();
@@ -283,14 +306,15 @@ function submitIosProcess() {
 }
 
 function submitAndroidProcess() {
-    const token = document.getElementById('androidTokenInput').value;
+    const tokenInput = document.getElementById('androidTokenInput');
+    const token = tokenInput ? tokenInput.value : '';
     const previewImg = document.getElementById('androidImgPreview');
 
     if (!token) {
         Swal.fire('Lỗi', 'Vui lòng nhập Token Android!', 'error');
         return;
     }
-    if (!previewImg.src || previewImg.style.display === 'none') {
+    if (!previewImg || !previewImg.src || previewImg.style.display === 'none') {
         Swal.fire('Lỗi', 'Vui lòng chọn và cắt ảnh trước!', 'error');
         return;
     }
