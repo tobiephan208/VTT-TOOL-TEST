@@ -8,7 +8,7 @@ const SKIN_BADGES = [
     { id: 'bac_s_plus_huu_han', name: 'Bậc S+ Hữu Hạn', icon: './assets/bac-skin/S+HUU-HAN.png' },
     { id: 'bac_s_dac_biet', name: 'Bậc S Đặc Biệt', icon: './assets/bac-skin/S-DAC-BIET.png' },
     { id: 'bac_s_plus_dac_biet', name: 'Bậc S+ Đặc Biệt', icon: './assets/bac-skin/S+-DAC-BIET.png' },
-    { id: 'bac_s_plus_premium', name: 'Bậc S+ Premium', icon: './assets/bac-skin/S+-PREMIUM.png' },
+    { id: 'bac_s_plus_premium', name: 'Bậc S+ Premium', icon: './assets/bac-skin/S+-Premium.png' },
     { id: 'bac_ss', name: 'Bậc SS', icon: './assets/bac-skin/SS.png' },
     { id: 'bac_ss_huu_han', name: 'Bậc SS Hữu Hạn', icon: './assets/bac-skin/SS-HUU-HAN.png' },
     { id: 'bac_ss_tuyet_sac', name: 'Bậc SS Tuyệt Sắc', icon: './assets/bac-skin/SS-TUYET-SAC' },
