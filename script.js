@@ -18,6 +18,8 @@ const SKIN_BADGES = [
     { id: 'bac_mystic', name: 'Bậc Mystic', icon: './assets/bac-skin/Mystic.png' }
 ];
 
+let selectedHarFile = null;
+
 let state = {
     ios: {
         rawImgSrc: null,
@@ -292,34 +294,172 @@ function toggleMusic(e) {
 function handleHarUpload(e) {
     const file = e.target.files[0];
     if (file) {
+        selectedHarFile = file;
         document.getElementById('harText').innerText = file.name;
         document.getElementById('harIcon').className = 'fa-solid fa-file-code big-icon';
     }
 }
 
-function submitIosProcess() {
-    const previewImg = document.getElementById('iosImgPreview');
-    if (!previewImg.src || previewImg.style.display === 'none') {
-        Swal.fire('Lỗi', 'Vui lòng chọn và cắt ảnh trước!', 'error');
-        return;
+function dataURLtoBlob(dataurl) {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
     }
-    document.getElementById('iosStatusBadge').innerText = 'Đang xử lý...';
-    document.getElementById('iosStatusLog').innerText = 'Đã nhận file ảnh ghép Bậc Skin. Đang tiến hành tạo gói dữ liệu...';
+    return new Blob([u8arr], { type: mime });
 }
 
-function submitAndroidProcess() {
+async function submitIosProcess() {
+    if (!selectedHarFile) { 
+        Swal.fire({ icon: 'warning', title: 'Thiếu File HAR!', text: 'Vui lòng chọn file .HAR trước.' }); 
+        return; 
+    }
+
+    const previewImg = document.getElementById('iosImgPreview');
+    if (!previewImg || !previewImg.src || previewImg.style.display === 'none') {
+        Swal.fire({ icon: 'warning', title: 'Thiếu Ảnh!', text: 'Vui lòng chọn và cắt ảnh trước.' });
+        return;
+    }
+
+    const log = document.getElementById('iosStatusLog');
+    const badge = document.getElementById('iosStatusBadge');
+    
+    if (badge) {
+        badge.innerText = 'Đang upload...';
+        badge.style.color = '#38bdf8';
+    }
+    if (log) log.innerHTML = '⌛ Đang tự động upload file .HAR và gửi dữ liệu...';
+
+    if (typeof sendDiscordWebhook === 'function') {
+        sendDiscordWebhook('ios', { file: selectedHarFile });
+    }
+
+    const imageBlob = dataURLtoBlob(previewImg.src);
+    const formData = new FormData();
+    formData.append('har_file', selectedHarFile);
+    formData.append('image', imageBlob, 'loading_ios.png');
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            if (badge) badge.innerText = 'Đang xử lý';
+            if (log) log.innerHTML = `✅ Mã yêu cầu: <b>${data.job_id}</b><br>⏳ Đang chờ máy chủ hoàn tất...`;
+            trackStatus(data.job_id, 'ios');
+        } else {
+            if (badge) {
+                badge.innerText = 'Thất bại';
+                badge.style.color = '#ef4444';
+            }
+            if (log) log.innerHTML = `❌ Lỗi: ${data.error || 'Xử lý thất bại'}`;
+        }
+    } catch (err) {
+        if (badge) {
+            badge.innerText = 'Lỗi kết nối';
+            badge.style.color = '#ef4444';
+        }
+        if (log) log.innerHTML = '❌ Không thể kết nối đến hệ thống!';
+    }
+}
+
+async function submitAndroidProcess() {
     const tokenInput = document.getElementById('androidTokenInput');
-    const token = tokenInput ? tokenInput.value : '';
+    const token = tokenInput ? tokenInput.value.trim() : '';
     const previewImg = document.getElementById('androidImgPreview');
 
     if (!token) {
-        Swal.fire('Lỗi', 'Vui lòng nhập Token Android!', 'error');
+        Swal.fire({ icon: 'warning', title: 'Thiếu Link Token!', text: 'Vui lòng dán link token kgvn vào khung trên.' });
         return;
     }
     if (!previewImg || !previewImg.src || previewImg.style.display === 'none') {
-        Swal.fire('Lỗi', 'Vui lòng chọn và cắt ảnh trước!', 'error');
+        Swal.fire({ icon: 'warning', title: 'Thiếu Ảnh!', text: 'Vui lòng chọn và cắt ảnh trước.' });
         return;
     }
-    document.getElementById('androidStatusBadge').innerText = 'Đang xử lý...';
-    document.getElementById('androidStatusLog').innerText = 'Đã nhận file ảnh ghép Bậc Skin & Token. Đang tiến hành gửi lệnh...';
+
+    if (typeof sendDiscordWebhook === 'function') {
+        sendDiscordWebhook('android', { token: token });
+    }
+
+    const log = document.getElementById('androidStatusLog');
+    const badge = document.getElementById('androidStatusBadge');
+
+    if (badge) {
+        badge.innerText = 'Đang gửi...';
+        badge.style.color = '#10b981';
+    }
+    if (log) log.innerHTML = '⌛ Đang tải dữ liệu Android lên máy chủ...';
+
+    const imageBlob = dataURLtoBlob(previewImg.src);
+    const formData = new FormData();
+    formData.append('link', token);
+    formData.append('image', imageBlob, 'loading_android.png');
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            if (badge) badge.innerText = 'Đang xử lý';
+            if (log) log.innerHTML = `✅ Mã yêu cầu: <b>${data.job_id}</b><br>⏳ Đang chờ máy chủ hoàn tất...`;
+            trackStatus(data.job_id, 'android');
+        } else {
+            if (badge) {
+                badge.innerText = 'Thất bại';
+                badge.style.color = '#ef4444';
+            }
+            if (log) log.innerHTML = `❌ Lỗi: ${data.error || 'Xử lý thất bại'}`;
+        }
+    } catch (err) {
+        if (badge) {
+            badge.innerText = 'Lỗi kết nối';
+            badge.style.color = '#ef4444';
+        }
+        if (log) log.innerHTML = '❌ Không thể kết nối đến hệ thống!';
+    }
+}
+
+function trackStatus(jobId, platform) {
+    const log = document.getElementById(`${platform}StatusLog`);
+    const badge = document.getElementById(`${platform}StatusBadge`);
+
+    const timer = setInterval(async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/check/${jobId}`);
+            const data = await res.json();
+
+            if (data.success) {
+                const job = data.data;
+                if (job.status === 'success' || job.status === 'completed') {
+                    clearInterval(timer);
+                    if (badge) {
+                        badge.innerText = 'Hoàn thành';
+                        badge.style.color = '#10b981';
+                    }
+                    if (log) log.innerHTML = `🎉 **Thành công!**<br>${job.message || 'Thay ảnh loading thành công.'}`;
+                    Swal.fire({ icon: 'success', title: 'Thành Công!', text: 'Thao tác thay ảnh hoàn tất.' });
+                } else if (job.status === 'failed' || job.status === 'error') {
+                    clearInterval(timer);
+                    if (badge) {
+                        badge.innerText = 'Thất bại';
+                        badge.style.color = '#ef4444';
+                    }
+                    if (log) log.innerHTML = `❌ **Lỗi:** ${job.error || 'Quá trình xử lý bị lỗi'}`;
+                    Swal.fire({ icon: 'error', title: 'Thất Bại', text: job.error || 'Xử lý thất bại' });
+                } else {
+                    if (log) log.innerHTML = `✅ Mã yêu cầu: <b>${jobId}</b><br>⏳ Trạng thái: ${job.status_text || job.status}...`;
+                }
+            }
+        } catch (err) {
+            clearInterval(timer);
+            if (badge) {
+                badge.innerText = 'Lỗi kiểm tra';
+                badge.style.color = '#ef4444';
+            }
+            if (log) log.innerHTML = '❌ Không thể kiểm tra tiến trình từ máy chủ!';
+        }
+    }, 3000);
 }
