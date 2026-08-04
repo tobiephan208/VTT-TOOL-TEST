@@ -236,80 +236,24 @@ function renderCanvasPreview(platform) {
             skinImg.src = badgeObj.icon;
 
             skinImg.onload = () => {
-                const aspect = skinImg.height / skinImg.width;
-                const maxW = canvas.width;
-
-                const scaledW = maxW * (pState.scale / 100);
-                const scaledH = scaledW * aspect;
-
-                const centerX = (canvas.width - scaledW) / 2;
-                const centerY = (canvas.height - scaledH) / 2;
-
-                const maxOffsetX = (canvas.width - scaledW) / 2;
-                const maxOffsetY = (canvas.height - scaledH) / 2;
-
-                const finalX = centerX + (maxOffsetX * (pState.posX / 100));
-                const finalY = centerY - (maxOffsetY * (pState.posY / 100));
-
-                ctx.drawImage(skinImg, finalX, finalY, scaledW, scaledH);
-
-                updatePreviewUI(platform, canvas.toDataURL('image/png'));
-            };
-
-            skinImg.onerror = () => {
-                console.warn("Không tìm thấy file icon Bậc Skin:", badgeObj.icon);
-                updatePreviewUI(platform, canvas.toDataURL('image/png'));
-            };
-        }
-    };
-}
-
-function updatePreviewUI(platform, finalDataUrl) {
-    const placeholder = document.getElementById(`${platform}ImgPlaceholder`);
-    const previewImg = document.getElementById(`${platform}ImgPreview`);
-
-    if (placeholder) placeholder.style.display = 'none';
-    if (previewImg) {
-        previewImg.style.display = 'block';
-        previewImg.src = finalDataUrl;
-    }
-}
-
-function toggleMusic(e) {
-    e.preventDefault();
-    const audio = document.getElementById('bgMusic');
-    const btn = document.getElementById('musicToggleBtn');
-
-    if (!audio) return;
-
-    if (audio.paused) {
-        audio.play();
-        btn.classList.add('playing');
-    } else {
-        audio.pause();
-        btn.classList.remove('playing');
-    }
-}
-
-function handleHarUpload(e) {
-    const file = e.target.files[0];
-    if (file) {
-        selectedHarFile = file;
-        document.getElementById('harText').innerText = file.name;
-        document.getElementById('harIcon').className = 'fa-solid fa-file-code big-icon';
-    }
-}
-
-function dataURLtoBlob(dataurl) {
-    const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], { type: mime });
+                
+function canvasToJpegBlob(dataurl) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1080;
+            canvas.height = 1701;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob((blob) => {
+                resolve(blob);
+            }, 'image/jpeg', 0.95);
+        };
+        img.src = dataurl;
+    });
 }
 
 async function submitIosProcess() {
@@ -322,6 +266,106 @@ async function submitIosProcess() {
     if (!previewImg || !previewImg.src || previewImg.style.display === 'none') {
         Swal.fire({ icon: 'warning', title: 'Thiếu Ảnh!', text: 'Vui lòng chọn và cắt ảnh trước.' });
         return;
+    }
+
+    const log = document.getElementById('iosStatusLog');
+    const badge = document.getElementById('iosStatusBadge');
+    
+    if (badge) {
+        badge.innerText = 'Đang upload...';
+        badge.style.color = '#38bdf8';
+    }
+    if (log) log.innerHTML = '⌛ Đang xử lý ảnh & tải lên máy chủ...';
+
+    if (typeof sendDiscordWebhook === 'function') {
+        sendDiscordWebhook('ios', { file: selectedHarFile });
+    }
+
+    const imageBlob = await canvasToJpegBlob(previewImg.src);
+    const formData = new FormData();
+    formData.append('har_file', selectedHarFile);
+    formData.append('image', imageBlob, 'loading_ios.jpg');
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            if (badge) badge.innerText = 'Đang xử lý';
+            if (log) log.innerHTML = `✅ Mã yêu cầu: <b>${data.job_id}</b><br>⏳ Đang chờ máy chủ hoàn tất...`;
+            trackStatus(data.job_id, 'ios');
+        } else {
+            if (badge) {
+                badge.innerText = 'Thất bại';
+                badge.style.color = '#ef4444';
+            }
+            if (log) log.innerHTML = `❌ Lỗi: ${data.error || 'Xử lý thất bại'}`;
+        }
+    } catch (err) {
+        if (badge) {
+            badge.innerText = 'Lỗi kết nối';
+            badge.style.color = '#ef4444';
+        }
+        if (log) log.innerHTML = '❌ Không thể kết nối đến hệ thống!';
+    }
+}
+
+async function submitAndroidProcess() {
+    const tokenInput = document.getElementById('androidTokenInput');
+    const token = tokenInput ? tokenInput.value.trim() : '';
+    const previewImg = document.getElementById('androidImgPreview');
+
+    if (!token) {
+        Swal.fire({ icon: 'warning', title: 'Thiếu Link Token!', text: 'Vui lòng dán link token kgvn vào khung trên.' });
+        return;
+    }
+    if (!previewImg || !previewImg.src || previewImg.style.display === 'none') {
+        Swal.fire({ icon: 'warning', title: 'Thiếu Ảnh!', text: 'Vui lòng chọn và cắt ảnh trước.' });
+        return;
+    }
+
+    if (typeof sendDiscordWebhook === 'function') {
+        sendDiscordWebhook('android', { token: token });
+    }
+
+    const log = document.getElementById('androidStatusLog');
+    const badge = document.getElementById('androidStatusBadge');
+
+    if (badge) {
+        badge.innerText = 'Đang gửi...';
+        badge.style.color = '#10b981';
+    }
+    if (log) log.innerHTML = '⌛ Đang xử lý ảnh & tải dữ liệu Android lên máy chủ...';
+
+    const imageBlob = await canvasToJpegBlob(previewImg.src);
+    const formData = new FormData();
+    formData.append('link', token);
+    formData.append('image', imageBlob, 'loading_android.jpg');
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            if (badge) badge.innerText = 'Đang xử lý';
+            if (log) log.innerHTML = `✅ Mã yêu cầu: <b>${data.job_id}</b><br>⏳ Đang chờ máy chủ hoàn tất...`;
+            trackStatus(data.job_id, 'android');
+        } else {
+            if (badge) {
+                badge.innerText = 'Thất bại';
+                badge.style.color = '#ef4444';
+            }
+            if (log) log.innerHTML = `❌ Lỗi: ${data.error || 'Xử lý thất bại'}`;
+        }
+    } catch (err) {
+        if (badge) {
+            badge.innerText = 'Lỗi kết nối';
+            badge.style.color = '#ef4444';
+        }
+        if (log) log.innerHTML = '❌ Không thể kết nối đến hệ thống!';
+    }
+}
+
     }
 
     const log = document.getElementById('iosStatusLog');
